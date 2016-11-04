@@ -70,16 +70,14 @@ To create a `JSON` array, write each element on its own line using the same inde
 
 <table>
 <thead><tr><th>sJSON</th><th>JSON</th></tr></thead>
-<tr><td style="width=50%">
-<pre><code>
-Tom
+<tr><td>
+<pre><code>Tom
 Dick
 Harry
 </code></pre>
 </td>
-<td style="width: 50%">
-<pre><code>
-[
+<td>
+<pre><code>[
 	"Tom",
 	"Dick",
 	"Harry"
@@ -92,15 +90,13 @@ To create a JSON object, separate the key and value with a colon. Write each key
 <table>
 <thead><tr><th>sJSON</th><th>JSON</th></tr></thead>
 <tr><td>
-<pre><code>
-City: Tulsa
+<pre><code>City: Tulsa
 Population: 45 million
 Location: 45’ W 37’N
 </code></pre>
 </td>
 <td>
-<pre><code>
-{
+<pre><code>{
 	"City": "Tulsa",
 	"Population" : "45 million",
 	"Location" : "45’ W 37’N"
@@ -117,8 +113,7 @@ To nest arrays, write a hyphen all by itself as an array marker, then indent the
 <table>
 <thead><tr><th>sJSON</th><th>JSON</th></tr></thead>
 <tr><td>
-<pre><code>
--
+<pre><code>-
 	1
 	2
 	3
@@ -130,8 +125,7 @@ To nest arrays, write a hyphen all by itself as an array marker, then indent the
 </code></pre>
 </td>
 <td>
-<pre><code>
-[
+<pre><code>[
 	[
 		1,
 		2,
@@ -151,16 +145,14 @@ To nest inside an object, write the key and colon on one line, then indent the n
 <table>
 <thead><tr><th>sJSON</th><th>JSON</th></tr></thead>
 <tr><td>
-<pre><code>
-flavors:
+<pre><code>flavors:
 	chocolate
 	vanilla
 	strawberry
 </code></pre>
 </td>
 <td>
-<pre><code>
-{
+<pre><code>{
 	"flavors": [
 		"chocolate",
 		"vanilla",
@@ -177,8 +169,7 @@ You can use commas to separate simple array elements on the same line.
 <table>
 <thead><tr><th>sJSON</th><th>JSON</th></tr></thead>
 <tr><td>
-<pre><code>
-numbers :
+<pre><code>numbers :
 	1,2,3
 
 colors :
@@ -186,8 +177,7 @@ colors :
 </code></pre>
 </td>
 <td>
-<pre><code>
-{
+<pre><code>{
 	"numbers": [
 		1,
 		2,
@@ -207,8 +197,7 @@ You can do the same comma trick with objects that contain simple values only.
 <table>
 <thead><tr><th>sJSON</th><th>JSON</th></tr></thead>
 <tr><td>
-<pre><code>
-Name: Tom, Age: 42, City: Miami
+<pre><code>Name: Tom, Age: 42, City: Miami
 
 Name: Fred, Age: 37, City: Houston
 
@@ -216,8 +205,7 @@ Name: Lucy, Age: 43, City: Cincinnati
 </code></pre>
 </td>
 <td>
-<pre><code>
-[
+<pre><code>[
 	{
 		"Name": "Tom",
 		"Age": 42,
@@ -256,30 +244,26 @@ JSON allows empty arrays and empty objects. To write those in simpJSON, use a lo
 <table>
 <thead><tr><th>sJSON</th><th>JSON</th></tr></thead>
 <tr><td>
-<pre><code>
-list of nobel prizes I’ve won so far:
+<pre><code>list of nobel prizes I’ve won so far:
 	,
 </code></pre>
 </td>
 <td>
-<pre><code>
-{ "list of nobel prizes won I’ve won so far": [] }
+<pre><code>{ "list of nobel prizes won I’ve won so far": [] }
 </code></pre>
 </td></tr></table>
 
 <table>
 <thead><tr><th>sJSON</th><th>JSON</th></tr></thead>
 <tr><td>
-<pre><code>
-## a whole lot of nothing
+<pre><code>## a whole lot of nothing
 :
 :
 :
 </code></pre>
 </td>
 <td>
-<pre><code>
-[
+<pre><code>[
 	{},
 	{},
 	{},
@@ -294,8 +278,7 @@ As you might have noticed in the last example, two pound signs will mark the res
 <table>
 <thead><tr><th>sJSON</th><th>JSON</th></tr></thead>
 <tr><td>
-<pre><code>
-members:
+<pre><code>members:
 	Larry
 	Dana
 	##Fred – he dropped out last month
@@ -303,8 +286,7 @@ members:
 </code></pre>
 </td>
 <td>
-<pre><code>
-{
+<pre><code>{
 	"members": [
 		"Larry",
 		"Dana",
@@ -323,15 +305,13 @@ Look at this example again. These table-like structures, with the same keys repe
 <table>
 <thead><tr><th>sJSON</th><th>JSON</th></tr></thead>
 <tr><td>
-<pre><code>
-Name: Tom, Age: 42, City: Miami
+<pre><code>Name: Tom, Age: 42, City: Miami
 Name: Fred, Age: 37, City: Houston
 Name: Lucy, Age: 43, City: Cincinnati
 </code></pre>
 </td>
 <td>
-<pre><code>
-[
+<pre><code>[
 	{
 		"Name": "Tom",
 		"Age": 42,
@@ -356,8 +336,7 @@ Name: Lucy, Age: 43, City: Cincinnati
 <table>
 <thead><tr><th>sJSON</th><th>JSON</th></tr></thead>
 <tr><td>
-<pre><code>
-:: Name, Age, City
+<pre><code>:: Name, Age, City
 	Tom, 42, Miami
 	Fred, 37, Houston
 	Lucy, 43, Cincinnati
@@ -365,8 +344,7 @@ Name: Lucy, Age: 43, City: Cincinnati
 </code></pre>
 </td>
 <td>
-<pre><code>
-[
+<pre><code>[
 	{
 		"Name": "Tom",
 		"Age": 42,
@@ -393,8 +371,7 @@ If you have a record nested inside an object, you can write it like this.
 <table>
 <thead><tr><th>sJSON</th><th>JSON</th></tr></thead>
 <tr><td>
-<pre><code>
-## You can write
+<pre><code>## You can write
 
 people:
 	:: Name, Age, City
@@ -412,8 +389,7 @@ people :: Name, Age, City
 </code></pre>
 </td>
 <td>
-<pre><code>
-{
+<pre><code>{
 	"people": [
 		{
 			"Name": "Tom",
@@ -446,16 +422,14 @@ In `sJSON`, indentation is allowed (and expected) after an array marker, for nes
 <table>
 <thead><tr><th>sJSON</th><th>JSON</th></tr></thead>
 <tr><td>
-<pre><code>
--
+<pre><code>-
 oops
 not
 nested
 </code></pre>
 </td>
 <td>
-<pre><code>
-[
+<pre><code>[
 	"-",
 	"oops",
 	"not",
@@ -471,8 +445,7 @@ If you indent in an unexpected place, `sJSON` will emit an error and stop.
 <table>
 <thead><tr><th>sJSON</th><th>JSON</th></tr></thead>
 <tr><td>
-<pre><code>
-Can, I, do, this:
+<pre><code>Can, I, do, this:
 	the
 	answer
 	is
@@ -480,8 +453,7 @@ Can, I, do, this:
 </code></pre>
 </td>
 <td>
-<pre><code>
-Warning: Object is missing a value on line 1. Converted to string.
+<pre><code>Warning: Object is missing a value on line 1. Converted to string.
 Can, I, do, this:
 		  ^^^^^
 Error: Illegal indentation on line 2.
@@ -491,8 +463,7 @@ Error: Illegal indentation on line 2.
 <table>
 <thead><tr><th>sJSON</th><th>JSON</th></tr></thead>
 <tr><td>
-<pre><code>
-Can
+<pre><code>Can
 I
 do
 this:
@@ -503,8 +474,7 @@ this:
 </code></pre>
 </td>
 <td>
-<pre><code>
-[
+<pre><code>[
 	"Can",
 	"I",
 	"do",
