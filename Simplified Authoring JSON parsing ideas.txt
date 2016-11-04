@@ -1,0 +1,80 @@
+How would we code up #NAME#?
+
+One line at a time:
+
+	1. First record the indentation level
+	2. Look for a quotation mark, if found, skip ahead to the next un-quoted quotation mark (so we skip over : and , inside quotes)
+	3. If no starting quote mark, then skip ahead to the next comma or colon
+	4. Take whatever we skipped over as a token. If it is not in quotes, and is a number, null, true or false, mark it as one of those tokens. Otherwise mark it as a token that needs quotes.
+	5. If the stopped-at character is a comma, then mark this line as forced array.
+	6. If the stopped-at character is a colon, check for a second colon.
+	7. If a second colon, then parse the rest of the line as a comma-separated array of key names (further colons will be ignored)
+	8. Continuing on with not a second colon: If we found a colon, then mark that we are in the middle of creating an object and parse the rest of the line for more commas or colons
+	9. If a comma, then mark that we are in the middle of creating an array and parse the rest of the line for further commas or colons
+	
+We could break this down into tokens and think of this like a grammar:
+
+What do lines in #NAME# look like?
+
+{indent} {-}
+{indent} {,}
+{indent} {:}
+{indent} {string} {:}
+{indent} {string} {:} {tokenwc}
+{indent} {string} {::} {key-list}
+{indent} {::} {key-list}
+{indent} {field-list}
+{indent} {token}
+{blank-line}
+{indent} {item-list}
+
+{string} = characters that don't include colon or comma, or else surrounded by quotes
+
+{token} = {null} | {true} | {false} | {number} | {string}  ## these strings can't include commas or colons unless they are in quotes
+{tokenwc} = {token} | {string-with-colon}  ## tokenwc is a token where the string can also include a colon without needing quotes
+
+{item-list} = {item} [ {,} {item} ]* [ {,} ]?
+{item} = {token}
+{item} = {:}
+{item} = {string} {:} {tokenwc}
+
+{field-list} = {field} [ {,} {field} ]*
+{field} = {tokenwc} | {}  ## we can have empty fields
+
+with open('file', 'r') as f:
+	for line in f:
+		parseLine(line)
+
+
+	
+How would we parse this: (or would we even allow this?)
+
+	name : Fred : father : Dave
+	
+would it become;
+
+	{ "name" : { "Fred" : { "father" : "Dave" } } }
+	
+But it really should have been written like this:
+
+	name :
+		fred :
+			father : Dave
+
+The tokens we care about are:
+
+null
+true
+false
+number
+string
+comma
+colon
+doublecolon
+indentation
+blankline
+newline
+hyphen
+
+so we create a tokenizer that looks for those and reports (via a callback) when it encounters one and what it is.
+

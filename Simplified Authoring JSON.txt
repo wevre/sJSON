@@ -1,0 +1,349 @@
+#NAME#
+
+#NAME# is a simplified syntax for authoring JSON data. JSON is an ubiquitous data transfer format, computer- and human-readable and -writeable, but as with other languages with opening and closing structures, the human-writeable aspect leaves much to be desired. It is hard for humans to keep track of commas and closing brackets and braces, especially when nested. For example, over in HTML, closing tags are a pain for a human author which is why we have Markdown for easier HTML authoring. Now we have #NAME# for easier JSON authoring.
+
+Here is what makes #NAME# easier:
+
+* Natural to write and read
+* Quotation marks rarely needed
+* No brackets or braces, instead we use commas, indenting, and spacing to indicate structure.
+* Comments
+
+Note: "indentation" refers to white space at the beginning of a line; "spacing" refers to white space between lines, a.k.a. "blank lines".
+
+I think I'll write the implementation first in Python, but the languages where I really want to have this are PHP and Swift. I don't see this being used for round-trip data exchange. It is really meant for human authoring and machine reading. No need to have machine authoring because we already have JSON. So really we are only interested in a parser that reads in and converts to JSON (or maybe reads in and converts to native structures). We are not interested in an encoder that converts from JSON (or native structures) to #NAME# because we could just send the JSON in the first place. (Similarly no one cares about an HTML to Markdown converter because if you already have the HTML your work is done.)
+
+Some examples.
+
+A simple array in JSON:
+
+	[ "a", "b", "c" ]
+	
+In #NAME#:
+
+	a
+	b
+	c
+
+A simple object (dictionary) in JSON:
+
+	{ "first" : "Fred", "last" : "Jones" }
+
+In #NAME#:
+
+	first : Fred
+	last : Jones
+
+When structures get more complicated, as they are wont to do, we use indentation or spacing to denote the hierarchy.
+
+In JSON:
+
+	[
+		7,
+		{ "name" : "Fred" },
+		{ "books" :
+			[
+				"Wuthering Heights",
+				"Gone With The Wind",
+				"The Tempest"
+			]
+		}
+	]
+
+In #NAME#:
+
+	7
+	name : Fred
+	books :
+		Wuthering Heights
+		Gone With the Wind
+		The Tempest
+
+When colon-separated pairs follow each other at the same indentation, they will be combined (naturally) into the same object:
+
+	first: Joe
+	last: Smith
+	age: 37
+	
+will be converted into: { "first" : "Joe", "last" : "Smith", "age" : 37 }.
+
+When we need to group array items (arrays within arrays) use blank lines and consistent indentation with each subgroup. For example:
+
+In JSON:
+
+	[ [ 1, 2, 3], ["a", "b", "c"] ]
+	
+In #NAME#:
+
+	1
+	2
+	3
+	
+	a
+	b
+	c
+
+#NAME# will not convert single items into arrays automatically:
+
+	1
+	
+	a
+	b
+	c
+	
+will not be converted into this: [ [ 1 ], [ a, b, c ] ], but simply [ 1, [ a, b, c ] ]. If you want a single item to be forced into an array, use a comma:
+
+	1,
+	
+	a
+	b
+	c
+	
+will become [ [ 1 ], [ a, b, c ] ]
+
+This brings up how to make empty arrays or objects. Use a comma or colon on a line by itself:
+
+	empty :
+		,
+		
+Will be converted into 
+
+	{ "empty" : [] }
+	
+Likewise, this fruitless construct:
+
+	:
+	:
+	:
+	
+Converts into
+
+	[ {}, {}, {} ]
+
+You don't usually have to put quotes around strings, #NAME# will automatically do it while converting, unless those strings contain colons, commas, or quotation marks that should be ignored by #NAME#:
+
+	times :
+		"10:45"
+		"11:45"
+		
+becomes: { "times" : [ "10:45", "11:45" ] }
+
+Note that if you did not quote the times, you would get:
+
+	{ times : { "10" : 45, "11" : 45 } }
+
+The strings "null", "true", and "false" will NOT be automatically quoted unless you use them as the key of an object, because JSON only allows strings as object keys.
+
+#NAME# will not put quotes around numbers, which are recognized with this regular expression:
+
+	-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?
+	
+#NAME# will not add quotes to a string that is already quoted, which is recognized with this regular expression:
+
+	"[^"\\]*(?:\\.[^"\\]*)*"
+	
+Whitespace is ignored except for at the beginning of the line, which indicates indentation, and between lines, which indicates hierarchy via the spacing. Think of a blank line like a comma between array elements. Items on separate lines should also be thought of as array entries, unless they involve colons, in which case they are object entries. You can explicitly use commas, think of them as shortening down blank lines.
+
+	1, 2, 3
+	
+is the same as
+
+	1
+	2
+	3
+
+or the same as
+
+	1
+	
+	2
+	
+	3
+
+But if there is another line right below, then it is interpreted differently:
+
+	1,2,3
+	4
+	
+is the same as
+
+	1
+	2
+	3
+	
+	4
+	
+which is converted to
+
+	[ [ 1, 2, 3 ], 4]
+
+Similarly with objects:
+
+	name : Fred, city : Tulsa, age : 32
+	
+is the same as
+
+	name : Fred
+	city : Tulsa
+	age : 32
+	
+Entries in an object are accumulated from left to right (or line by line) until a non-record is encountered (or a blank line).
+
+	name : Fred, city : Tulsa, 32
+	
+is the same as
+
+	name : Fred
+	city : Tulsa
+	32
+	
+and will be parsed as:
+
+	[
+		{ "name" : "Fred", "city" : "Tulsa" },
+		32
+	]
+
+If  a line has a comma on it, it will be treated as an array, even if there is nothing before or after the comma. So that is a way to force something to be treated as an array.
+
+You can also force an array, and indicated nesting of arrays, by using a hyphen on a line by itself. Suppose, for example, you wanted this JSON:
+
+	{ "books" :
+		[
+			[ "a", "b", "c" ],
+		]
+	}
+
+You can't do this because it will not produce the desired nesting:
+
+	books :
+		a
+		b
+		c
+
+Instead you must use a hyphen:
+
+	books :
+		-
+			a
+			b
+			c
+			
+Note that if the inner array had a sibling, the hyphen would not be needed:
+
+	books :
+		a
+		b
+		c
+		
+		1
+		2
+		3
+
+would produce this:
+
+	{ "books" :
+		[
+			[ "a", "b", "c" ],
+			[ 1, 2, 3 ]
+		]
+	}
+	
+So the rule of thumb: when you have to nest single-child arrays, use a hyphen.
+
+That brings up indentation. Indentation is only allowed in three cases: (1) after a line that ends with a colon; (2) after a line that contains a lone hyphen; or, (3) after a line with a double-colon and a key list, as described below. Any other uses of indentation will be an error. As you work your down a hierarchy with increasing levels of indentation, it is an error to "pop" back to a level of indenation that wasn't defined on the way down.
+
+Comments
+
+Let's borrow comments from Python and make anything after an unquoted double-pound sign (##) a comment.
+
+Records
+
+Many times we have repeated objects with the same keys. Like records in a database table. #NAME# has a handy way of authoring those:
+
+	:: key1, key2, key3
+	
+The double colon followed by a list of keys means the following indented lines will be turned into objects, using the same keys for each one.
+
+	:: name, city, age
+		Fred, Tulsa, 37
+		Bob, Boston, 41
+		
+will be converted into:
+
+	[ { "name" : "Fred", "city" : "Tulsa", "age" : 37 }, { "name" : "Bob", "city" : "Boston", "age" : 41 } ]
+	
+When a record is nested under an object key, you can shorten the syntax:
+
+	people :
+		:: name, city, age
+			Fred, Tulsa, 37
+			Bob, Boston, 41
+
+Instead you can write:
+
+	people :: name, city, age
+		Fred, Tulsa, 37
+		Bob, Boston, 41
+		
+To get this result:
+
+	{ "people" : [ { "name" : "Fred", "city" : "Tulsa", "age" : 37 }, { "name" : "Bob", "city" : "Boston", "age" : 41 }  ] }
+	
+You can leave out an entry by typing the comma with no token:
+
+	peope :: name, city, age
+		Fred, , 37
+		Bob, Boston, 41
+
+becomes
+
+	{ "people" : [ { "name" : "Fred", "age" : 37 }, { "name" : "Bob", "city" : "Boston", "age" : 41 }  ] }
+
+The following will produce an error after it is converted into JSON:
+
+	cities :
+	Boston
+	New York
+	
+Since these are all at the same indentation level, we would get:
+
+	[ { "cities" : }, "Boston", "New York" ]
+	
+but JSON does not allow an object with a missing value. If you meant Boston and New York to be an array value with the key "cities", you must indent them.
+
+	cities :
+		Boston
+		New York
+
+A sample from the Flickr API
+
+{
+	"stat": "ok",
+	"blogs": {
+		"blog": [
+			{
+				"id"					: 73,
+				"name"				: "Bloxus test",
+				"needspassword"	: false,
+				"url"					: "http://remote.bloxus.com/"
+			},
+			{
+				"id"					: 74,
+				"name"				: "Manila Test",
+				"needspassword"	: true,
+				"url"					: "http://flickrtest1.userland.com/"
+			}
+		]
+	}
+}
+
+would be written in #NAME# as
+
+stat :  ok
+blogs :
+	blog :: id, name, needspassword, url
+		73, Bloxus test, false, "http://remote.bloxus.com"
+		74, Manila Test, true, "http://flickrtest1.userland.com/"
+
+as you can see, much simpler to write and to grasp at a glance.

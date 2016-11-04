@@ -1,0 +1,22 @@
+books :
+	Just Me
+
+	Some Others ## this will turn "Just Me" into an array and add "Some Others" To  it
+	That Go ## This should turn "Some Others" in an array. Seems like we need to keep track of "groups" triggered by blank lines
+	Together
+
+	By Myself
+
+shows :
+	I Love Lucy
+	Addams Family
+	Star Trek
+actors :    ## this will be grouped with "shows" and those two together will live at the same level as "books" and "songs"
+	Alan Alda
+	Bette Midler
+	Tony Danza
+
+songs :
+	Over the Rainbow
+	Peppermint Sky
+	Love me Tender

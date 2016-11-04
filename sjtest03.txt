@@ -1,0 +1,13 @@
+7
+name: Fred
+books:
+	Wuthering Heights
+	Gone With the Wind
+	The Tempest, ##<-- this should force wrap this into an array YES
+	#1 Lady's Detective Agency : sold, true, false,:,,
+	, ## <-- this should force wrap this into an empty array YES
+-
+name: Mike ## <-- this should emit a warning that we don't have any children
+age: 42
+gender:
+Male ## <-- this should emit a warning that we never closed the open pair
