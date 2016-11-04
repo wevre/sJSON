@@ -74,6 +74,7 @@ To create a `JSON` array, write each element on its own line using the same inde
 <pre><code>Tom
 Dick
 Harry
+                                        
 </code></pre>
 </td>
 <td>
@@ -82,6 +83,7 @@ Harry
 	"Dick",
 	"Harry"
 ]
+                                        
 </code></pre>
 </td></tr></table>
 
@@ -93,6 +95,7 @@ To create a JSON object, separate the key and value with a colon. Write each key
 <pre><code>City: Tulsa
 Population: 45 million
 Location: 45’ W 37’N
+                                        
 </code></pre>
 </td>
 <td>
@@ -101,6 +104,7 @@ Location: 45’ W 37’N
 	"Population" : "45 million",
 	"Location" : "45’ W 37’N"
 }
+                                        
 </code></pre>
 </td></tr></table>
 
@@ -122,6 +126,7 @@ To nest arrays, write a hyphen all by itself as an array marker, then indent the
 	red
 	yellow
 	blue
+                                        
 </code></pre>
 </td>
 <td>
@@ -137,6 +142,7 @@ To nest arrays, write a hyphen all by itself as an array marker, then indent the
 		"blue"
 	]
 ]
+                                        
 </code></pre>
 </td></tr></table>
 
@@ -149,6 +155,7 @@ To nest inside an object, write the key and colon on one line, then indent the n
 	chocolate
 	vanilla
 	strawberry
+                                        
 </code></pre>
 </td>
 <td>
@@ -159,6 +166,7 @@ To nest inside an object, write the key and colon on one line, then indent the n
 		"strawberry"
 	]
 }
+                                        
 </code></pre>
 </td></tr></table>
 
@@ -174,6 +182,7 @@ You can use commas to separate simple array elements on the same line.
 
 colors :
 	red, yellow, blue
+                                        
 </code></pre>
 </td>
 <td>
@@ -189,6 +198,7 @@ colors :
 		"blue"
 	]
 }
+                                        
 </code></pre>
 </td></tr></table>
 
@@ -202,6 +212,7 @@ You can do the same comma trick with objects that contain simple values only.
 Name: Fred, Age: 37, City: Houston
 
 Name: Lucy, Age: 43, City: Cincinnati
+                                        
 </code></pre>
 </td>
 <td>
@@ -222,6 +233,7 @@ Name: Lucy, Age: 43, City: Cincinnati
 		"City": "Cincinnati"
 	}
 ]
+                                        
 </code></pre>
 </td></tr></table>
 
@@ -246,10 +258,12 @@ JSON allows empty arrays and empty objects. To write those in simpJSON, use a lo
 <tr><td>
 <pre><code>list of nobel prizes I’ve won so far:
 	,
+                                        
 </code></pre>
 </td>
 <td>
 <pre><code>{ "list of nobel prizes won I’ve won so far": [] }
+                                        
 </code></pre>
 </td></tr></table>
 
@@ -260,6 +274,7 @@ JSON allows empty arrays and empty objects. To write those in simpJSON, use a lo
 :
 :
 :
+                                        
 </code></pre>
 </td>
 <td>
@@ -268,6 +283,7 @@ JSON allows empty arrays and empty objects. To write those in simpJSON, use a lo
 	{},
 	{},
 ]
+                                        
 </code></pre>
 </td></tr></table>
 
@@ -283,6 +299,7 @@ As you might have noticed in the last example, two pound signs will mark the res
 	Dana
 	##Fred – he dropped out last month
 	Tom
+                                        
 </code></pre>
 </td>
 <td>
@@ -293,6 +310,7 @@ As you might have noticed in the last example, two pound signs will mark the res
 		"Tom"
 	]
 }
+                                        
 </code></pre>
 </td></tr></table>
 
@@ -308,6 +326,7 @@ Look at this example again. These table-like structures, with the same keys repe
 <pre><code>Name: Tom, Age: 42, City: Miami
 Name: Fred, Age: 37, City: Houston
 Name: Lucy, Age: 43, City: Cincinnati
+                                        
 </code></pre>
 </td>
 <td>
@@ -328,6 +347,7 @@ Name: Lucy, Age: 43, City: Cincinnati
 		"City": "Cincinnati"
 	}
 ]
+                                        
 </code></pre>
 </td></tr></table>
 
@@ -340,7 +360,7 @@ Name: Lucy, Age: 43, City: Cincinnati
 	Tom, 42, Miami
 	Fred, 37, Houston
 	Lucy, 43, Cincinnati
-
+                                        
 </code></pre>
 </td>
 <td>
@@ -361,6 +381,7 @@ Name: Lucy, Age: 43, City: Cincinnati
 		"City": "Cincinnati"
 	}
 ]
+                                        
 </code></pre>
 </td></tr></table>
 
@@ -386,6 +407,7 @@ people :: Name, Age, City
 	Tom, 42, Miami
 	Fred, 37, Houston
 	Lucy, 43, Cincinnati
+                                        
 </code></pre>
 </td>
 <td>
@@ -408,6 +430,7 @@ people :: Name, Age, City
 		}
 	]
 }
+                                        
 </code></pre>
 </td></tr></table>
 
@@ -426,6 +449,7 @@ In `sJSON`, indentation is allowed (and expected) after an array marker, for nes
 oops
 not
 nested
+                                        
 </code></pre>
 </td>
 <td>
@@ -436,7 +460,9 @@ nested
 	"nested"
 ]
 
-Warning: Expecting indentation after array marker "-" on line 1.
+Warning: Expecting indentation after
+array marker "-" on line 1.
+                                        
 </code></pre>
 </td></tr></table>
 
@@ -450,13 +476,16 @@ If you indent in an unexpected place, `sJSON` will emit an error and stop.
 	answer
 	is
 	no
+                                        
 </code></pre>
 </td>
 <td>
-<pre><code>Warning: Object is missing a value on line 1. Converted to string.
+<pre><code>Warning: Object is missing a
+value on line 1. Converted to string.
 Can, I, do, this:
-		  ^^^^^
+            ^^^^^
 Error: Illegal indentation on line 2.
+                                        
 </code></pre>
 </td></tr></table>
 
@@ -471,6 +500,7 @@ this:
 	answer
 	is
 	yes
+                                        
 </code></pre>
 </td>
 <td>
@@ -487,6 +517,7 @@ this:
 		]
 	}
 ]
+                                        
 </code></pre>
 </td></tr></table>
 
