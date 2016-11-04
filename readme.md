@@ -9,35 +9,35 @@ This repository has code to implement `sJSON` in Python, PHP, and Swift. You can
 Take this valid `JSON` string:
 
 ```json
-[{“books”:[“Cat in the Hat”,”Are You My Mother?”,”Fox in Socks”]},{“colors”:[“red”,”yellow”,
-”blue”]},{“flavors”:[“chocolate”,”vanilla”,”strawberry”]}]
+[{"books":["Cat in the Hat","Are You My Mother?","Fox in Socks"]},{"colors":["red","yellow",
+"blue"]},{"flavors":["chocolate","vanilla","strawberry"]}]
 ```
 
 A computer has no problem reading that, but a human might struggle. When humans are involved, we spread things out and line things up to make it easier to see what’s going on.
 
 ```json
 [
-     {
-          “books”: [
-               “Cat in the Hat”,
-               “Are You My Mother?”,
-               “Fox in Socks”
-          ]
-     },
-     {
-          “colors”: [
-               “red”,
-               ”yellow”,
-               ”blue”
-          ]
-     },
-     {
-          “flavors”: [
-               “chocolate”,
-               ”vanilla”,
-               ”strawberry”
-          ]
-     }
+	{
+		"books": [
+			"Cat in the Hat",
+			"Are You My Mother?",
+			"Fox in Socks"
+		]
+	},
+	{
+		"colors": [
+			"red",
+			"yellow",
+			"blue"
+		]
+	},
+	{
+		"flavors": [
+			"chocolate",
+			"vanilla",
+			"strawberry"
+		]
+	}
 ]
 ```
 
@@ -69,21 +69,21 @@ flavors:
 To create a `JSON` array, write each element on its own line using the same indentation.
 
 <table>
+	<thead>
+	<tr><th>sJSON</th><th>JSON</th></tr>
+	</thead>
 	<tr><td>
-```sjson
-Tom
+<pre>Tom
 Dick
-Harry
-```
+Harry</pre>
 </td>
 <td>
-```json
+<pre>
 [
-     “Tom”,
-     “Dick”,
-     “Harry”
-]
-```
+	"Tom",
+	"Dick",
+	"Harry"
+]</pre>
 </td></tr></table>
 
 To create a JSON object, separate the key and value with a colon. Write each key-value pair on its own line using the same indentation.
@@ -92,9 +92,9 @@ City: Tulsa
 Population: 45 million
 Location: 45’ W 37’N
 {
-     “City”: “Tulsa”,
-     “Population” : “45 million”,
-     “Location” : “45’ W 37’N”
+	"City": "Tulsa",
+	"Population" : "45 million",
+	"Location" : "45’ W 37’N"
 }
 
 
@@ -103,40 +103,40 @@ Nested values
 To nest arrays, write a hyphen all by itself as an array marker, then indent the next lines.
 
 -
-     1
-     2
-     3
+	1
+	2
+	3
 
 -
-     red
-     yellow
-     blue
+	red
+	yellow
+	blue
 [
-     [
-          1,
-          2,
-          3
-     ],
-     [
-          “red”,
-          “yellow”,
-          “blue”
-     ]
+	[
+		1,
+		2,
+		3
+	],
+	[
+		"red",
+		"yellow",
+		"blue"
+	]
 ]
 
 
 To nest inside an object, write the key and colon on one line, then indent the next lines.
 
 flavors:
-     chocolate
-     vanilla
-     strawberry
+	chocolate
+	vanilla
+	strawberry
 {
-     “flavors”: [
-          “chocolate”,
-          “vanilla”,
-          “strawberry”
-     ]
+	"flavors": [
+		"chocolate",
+		"vanilla",
+		"strawberry"
+	]
 }
 
 
@@ -145,21 +145,21 @@ Cheating with commas
 You can use commas to separate simple array elements on the same line.
 
 numbers :
-     1,2,3
+	1,2,3
 
 colors :
-     red, yellow, blue
+	red, yellow, blue
 {
-     “numbers”: [
-          1,
-          2,
-          3
-     ],
-     “colors”: [
-          “red”,
-          “yellow”,
-          “blue”
-     ]
+	"numbers": [
+		1,
+		2,
+		3
+	],
+	"colors": [
+		"red",
+		"yellow",
+		"blue"
+	]
 }
 
 
@@ -171,40 +171,40 @@ Name: Fred, Age: 37, City: Houston
 Name: Lucy, Age: 43, City: Cincinnati
 
 [
-     {
-          “Name”: “Tom”,
-          “Age”: 42,
-          “City”: “Miami”
-     },
-     {
-          “Name”: “Fred”,
-          “Age”: 37,
-          “City”: “Houston”
-     },
-     {
-          “Name”: “Lucy”,
-          “Age”: 43,
-          “City”: “Cincinnati”
-     }
+	{
+		"Name": "Tom",
+		"Age": 42,
+		"City": "Miami"
+	},
+	{
+		"Name": "Fred",
+		"Age": 37,
+		"City": "Houston"
+	},
+	{
+		"Name": "Lucy",
+		"Age": 43,
+		"City": "Cincinnati"
+	}
 ]
 
 
 
 String values
 Notice we have not used quotes at all so far. sJSON is smart about putting quotes around your strings. Here are some things to keep in mind:
-•     Colons and commas are markers for arrays and objects. If you don’t want those interpreted as markers, they need to be inside a quoted string.
-•     A hyphen on a line by itself is an array marker. If you want it to be a string instead, then put quotes around it.
-•     sJSON will recognize and not put quotes around JSON numbers and JSON literals (true, false, null).
-•     Except for object keys. Only strings are allowed as object keys, so whatever you write for the key will always get quoted.
-•     We’ll add to this list after we’ve covered comments and raw JSON below.
+•	Colons and commas are markers for arrays and objects. If you don’t want those interpreted as markers, they need to be inside a quoted string.
+•	A hyphen on a line by itself is an array marker. If you want it to be a string instead, then put quotes around it.
+•	sJSON will recognize and not put quotes around JSON numbers and JSON literals (true, false, null).
+•	Except for object keys. Only strings are allowed as object keys, so whatever you write for the key will always get quoted.
+•	We’ll add to this list after we’ve covered comments and raw JSON below.
 [[NEED SOME EXAMPLES]]
 
 Empty values
 JSON allows empty arrays and empty objects. To write those in simpJSON, use a lone comma or a lone colon.
 
 list of nobel prizes I’ve won so far:
-     ,
-{ “list of nobel prizes won I’ve won so far”: [] }
+	,
+{ "list of nobel prizes won I’ve won so far": [] }
 
 
 
@@ -214,9 +214,9 @@ list of nobel prizes I’ve won so far:
 :
 :
 [
-     {},
-     {},
-     {},
+	{},
+	{},
+	{},
 ]
 
 
@@ -224,16 +224,16 @@ Comments
 As you might have noticed in the last example, two pound signs will mark the rest of the line as a comment.
 
 members:
-     Larry
-     Dana
-     ##Fred – he dropped out last month
-     Tom
+	Larry
+	Dana
+	##Fred – he dropped out last month
+	Tom
 {
-     “members”: [
-          “Larry”,
-          “Dana”,
-          “Tom”
-     ]
+	"members": [
+		"Larry",
+		"Dana",
+		"Tom"
+	]
 }
 
 
@@ -247,47 +247,47 @@ Name: Fred, Age: 37, City: Houston
 Name: Lucy, Age: 43, City: Cincinnati
 
 [
-     {
-          “Name”: “Tom”,
-          “Age”: 42,
-          “City”: “Miami”
-     },
-     {
-          “Name”: “Fred”,
-          “Age”: 37,
-          “City”: “Houston”
-     },
-     {
-          “Name”: “Lucy”,
-          “Age”: 43,
-          “City”: “Cincinnati”
-     }
+	{
+		"Name": "Tom",
+		"Age": 42,
+		"City": "Miami"
+	},
+	{
+		"Name": "Fred",
+		"Age": 37,
+		"City": "Houston"
+	},
+	{
+		"Name": "Lucy",
+		"Age": 43,
+		"City": "Cincinnati"
+	}
 ]
 
 
 sJSON has a shortcut for you, called a record, which you trigger with a double colon.
 
 :: Name, Age, City
-     Tom, 42, Miami
-     Fred, 37, Houston
-     Lucy, 43, Cincinnati
+	Tom, 42, Miami
+	Fred, 37, Houston
+	Lucy, 43, Cincinnati
 
 [
-     {
-          “Name”: “Tom”,
-          “Age”: 42,
-          “City”: “Miami”
-     },
-     {
-          “Name”: “Fred”,
-          “Age”: 37,
-          “City”: “Houston”
-     },
-     {
-          “Name”: “Lucy”,
-          “Age”: 43,
-          “City”: “Cincinnati”
-     }
+	{
+		"Name": "Tom",
+		"Age": 42,
+		"City": "Miami"
+	},
+	{
+		"Name": "Fred",
+		"Age": 37,
+		"City": "Houston"
+	},
+	{
+		"Name": "Lucy",
+		"Age": 43,
+		"City": "Cincinnati"
+	}
 ]
 
 
@@ -298,38 +298,38 @@ If you have a record nested inside an object, you can write it like this.
 ## You can write
 
 people:
-     :: Name, Age, City
-          Tom, 42, Miami
-          Fred, 37, Houston
-          Lucy, 43, Cincinnati
+	:: Name, Age, City
+		Tom, 42, Miami
+		Fred, 37, Houston
+		Lucy, 43, Cincinnati
 
 
 ## Or you can collapse
 
 people :: Name, Age, City
-     Tom, 42, Miami
-     Fred, 37, Houston
-     Lucy, 43, Cincinnati
+	Tom, 42, Miami
+	Fred, 37, Houston
+	Lucy, 43, Cincinnati
 
 
 {
-     “people”: [
-          {
-               “Name”: “Tom”,
-               “Age”: 42,
-               “City”: “Miami”
-          },
-          {
-               “Name”: “Fred”,
-               “Age”: 37,
-               “City”: “Houston”
-          },
-          {
-               “Name”: “Lucy”,
-               “Age”: 43,
-               “City”: “Cincinnati”
-          }
-     ]
+	"people": [
+		{
+			"Name": "Tom",
+			"Age": 42,
+			"City": "Miami"
+		},
+		{
+			"Name": "Fred",
+			"Age": 37,
+			"City": "Houston"
+		},
+		{
+			"Name": "Lucy",
+			"Age": 43,
+			"City": "Cincinnati"
+		}
+	]
 }
 
 
@@ -344,25 +344,25 @@ oops
 not
 nested
 [
-     “-“,
-     “oops”,
-     “not”,
-     “nested”
+	"-",
+	"oops",
+	"not",
+	"nested"
 ]
 
-Warning: Expecting indentation after array marker “-“ on line 1.
+Warning: Expecting indentation after array marker "-" on line 1.
 
 
 If you indent in an unexpected place, sJSON will emit an error and stop.
 
 Can, I, do, this:
-     the
-     answer
-     is
-     no
+	the
+	answer
+	is
+	no
 Warning: Object is missing a value on line 1. Converted to string.
 Can, I, do, this:
-            ^^^^^
+		  ^^^^^
 Error: Illegal indentation on line 2.
 
 
@@ -372,22 +372,22 @@ Can
 I
 do
 this:
-     the
-     answer
-     is
-     yes
+	the
+	answer
+	is
+	yes
 [
-     “Can”,
-     “I”,
-     “do”,
-     {
-          “this”: [
-               “the”,
-               “answer”,
-               “is”,
-               “yes”
-          ]
-     }
+	"Can",
+	"I",
+	"do",
+	{
+		"this": [
+			"the",
+			"answer",
+			"is",
+			"yes"
+		]
+	}
 ]
 
 
