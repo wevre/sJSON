@@ -70,14 +70,14 @@ To create a `JSON` array, write each element on its own line using the same inde
 
 <table>
 <thead><tr><th>sJSON</th><th>JSON</th></tr></thead>
-<tr><td>
+<tr><td style="width=50%">
 <pre><code>
 Tom
 Dick
 Harry
 </code></pre>
 </td>
-<td>
+<td style="width: 50%">
 <pre><code>
 [
 	"Tom",
