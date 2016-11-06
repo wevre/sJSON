@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-#  simpjson.py
+#  sjson.py
 #
 #  Created by Mike Weaver on 2016-10-27.
 #
@@ -8,7 +8,7 @@
 #TODO: deal with quotes, numbers, literals (i.e., when to add quotes and when not to)
 #TODO: deal with arrays of pairs (so they wrap with braces instead of brackets)
 #TODO: remember to .strip() the underlying Name tokens
-#TODO: JSON mode needs to support multiline
+#TODO: wrap some of our longer lines, if possible
 
 import sys
 import re
@@ -49,9 +49,6 @@ class DoubleColonToken(Token):
 	pass
 
 class CommentToken(Token):
-	pass
-
-class JSONToken(Token):
 	pass
 
 #
@@ -123,8 +120,6 @@ class Lexer:
 		stringMode = False
 		commentMode = False
 		prev = ''
-		jsonStack = []
-		jsonMode = False
 		for chr in line:
 			# EOL character
 			if '\n' == chr:
@@ -134,21 +129,6 @@ class Lexer:
 				token = self.currentToken()
 				assert token and isinstance(token, CommentToken)
 				token.pushChar(chr)
-			# JSON mode
-			elif jsonMode:
-				token = self.currentToken()
-				assert token and isinstance(token, JSONToken)
-				token.pushChar(chr)
-				if '[' == chr or '{' == chr:
-					jsonStack.push(chr)
-				elif (']' == chr and '[' == jsonStack[-1]) or ('}' == chr and '{' == jsonStack[-1]):
-					jsonStack.pop()
-				elif (']' == chr and '{' == jsonStack[-1]) or ('}' == chr and '[' == jsonStack[-1]):
-					print 'error: mismatched JSON delimiters'
-					# we should report an error
-					pass
-				if not jsonStack:
-					jsonMode = False
 			# Whitespace
 			elif '\t' == chr or ' ' == chr:
 				token = self.currentToken()
@@ -167,10 +147,6 @@ class Lexer:
 				self.scan_POUND(chr)
 				if '#' == prev:
 					commentMode = True
-			# JSON
-			elif ('[' == chr or '{' == chr) and not stringMode:
-				self.addToken(JSONToken(chr, self.lineNumber, self.charPosition))
-				jsonMode = True
 			# Beginning quote
 			elif '"' == chr and not stringMode:
 				self.scan_CHARACTER(chr)
@@ -289,9 +265,6 @@ class Parser:
 			return True
 		if 1+target == len(tokens) and isinstance(tokens[target], ColonToken):
 			self.parsedNode = PairNode(self.indent)
-			return True
-		if 1+target == len(tokens) and isinstance(tokens[target], JSONToken):
-			self.parsedNode = JSONNode(self.indent, tokens[target])
 			return True
 		if 2+target < len(tokens) and isinstance(tokens[target], NameToken) and isinstance(tokens[target+1], ColonToken):
 			self.parsedNode = PairNode(self.indent, tokens[target], [ StringNode(self.indent, self.mergeTokens(tokens[target+2:])) ])
