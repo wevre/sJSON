@@ -262,13 +262,7 @@ class ArrayNode(Node):
 		self.writeChildren(stream, pretty)
 		if needsBrackets: self.writeClose(']', stream, pretty and self.childGroups[0])
 
-class RecordNode(Node):
-
-	def output(self, stream, pretty):
-		needsBrackets = ((self.payload and '-' == self.payload.text) or not self.childGroups[0] or (1 == len(self.childGroups) and 1 == len(self.childGroups[0]) and not isinstance(self.childGroups[0][0], PairNode) and not isinstance(self.childGroups[0][0], ArrayNode)))
-		if needsBrackets: self.writeOpen('[', stream, pretty)
-		self.writeChildren(stream, pretty)
-		if needsBrackets: self.writeClose(']', stream, pretty)
+class RecordNode(ArrayNode):
 
 	def zip(self, keys, list):
 		i = 0
