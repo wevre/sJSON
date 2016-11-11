@@ -370,10 +370,7 @@ class Parser:
 			while nodeStack:
 				cursor = nodeStack[-1]
 				if not cursor.indent or (self.indent.text > cursor.indent.text and self.indent.text.startswith(cursor.indent.text)):
-					if not cursor.childGroups[-1] or cursor.childGroups[-1][-1].indent.text == self.indent.text:
-						#everything is okay
-						pass
-					else:
+					if cursor.childGroups[-1] and cursor.childGroups[-1][-1].indent.text != self.indent.text:
 						# we have an error, because the indent is greater than the parent, but doesn't match prior siblings
 						print "error because indent is greater than parent, but doesn't match prior siblings"
 						return None
