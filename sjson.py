@@ -5,12 +5,6 @@
 #  Created by Mike Weaver on 2016-10-27.
 #
 
-#TODO: deal with quotes, numbers, literals (i.e., when to add quotes and when not to)
-#TODO: if a childGroup has only one item, don't wrap it as an array
-#TODO: deal with arrays of pairs (so they wrap with braces instead of brackets)
-#TODO: remember to .strip() the underlying Name tokens
-#TODO: wrap some of our longer lines, if possible
-
 import sys
 import re
 
@@ -78,19 +72,6 @@ class Lexer:
 		if self.twoConsecutiveColons(token):
 			original = self.tokenList.pop()
 			token = DoubleColonToken('::', original.lineNumber, original.charPosition)
-		self.tokenList.append(token)
-
-	def evalCurrItem(self):
-		'''This function is not used right now, but the logic will be useful when we are ready to generate the output.'''
-		item = self.currItem.strip()
-		if not item: return
-		if item == 'null' or item == 'false' or item == 'true':
-			token = NameToken(item, self.lineNumber, self.charPosition)
-		elif re.match('^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$', item):
-			token = NameToken(item, self.lineNumber, self.charPosition)
-		else:
-			hasQuotes = item.endswith('"') and item.startswith('"')
-			token = NameToken(item, self.lineNumber, self.charPosition)
 		self.tokenList.append(token)
 
 	#
@@ -189,7 +170,7 @@ class Node:
 			result += ' payload=`' + self.payload.text.strip() + '`'
 		if self.keys:
 			result += ' keys=[' + ', '.join(c.payload.text.strip() for c in self.keys.childGroups[-1]) + ']'
-		if self.childGroups[-1]: #TODO: this needs to change to accommodate groups
+		if self.childGroups[-1]:
 			result += ' children=['
 			i = 1
 			Node.indent += ' '*5
@@ -210,17 +191,67 @@ class Node:
 		group = self.childGroups[-1]
 		group.append(child)
 
+	def writeChildren(self, stream, pretty):
+		needsOuterWrap = (self.childGroups and 1<len(self.childGroups))
+		if needsOuterWrap: stream.write('[')
+		doneOneGroup = False
+		for children in self.childGroups:
+			braces = (children and all(isinstance(c, PairNode) for c in children))
+			if doneOneGroup: stream.write(',')
+			needsWrap = (children and (1<len(children) or braces))
+			if needsWrap: stream.write('{' if braces else '[')
+			doneOneChild = False
+			for c in children:
+				if doneOneChild: stream.write(',')
+				needsBraces = (not braces and isinstance(c, PairNode))
+				if needsBraces: stream.write('{')
+				c.output(stream, pretty)
+				if needsBraces: stream.write('}')
+				doneOneChild = True
+			if needsWrap: stream.write('}' if braces else ']')
+			doneOneGroup = True
+		if needsOuterWrap: stream.write(']')
+
+	def writePayload(self, stream, literals=True):
+		stripped = self.payload.text.strip()
+		if literals and (stripped == 'null' or stripped == 'false' or stripped == 'true'):
+			stream.write(stripped)
+		elif literals and re.match('^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$', stripped):
+			stream.write(stripped)
+		elif stripped.endswith('"') and stripped.startswith('"'):
+			stream.write(stripped)
+		else:
+			stream.write('"' + stripped + '"')
+
+
 class StringNode(Node):
-	pass
+
+	def output(self, stream, pretty):
+		self.writePayload(stream)
 
 class PairNode(Node):
-	pass
+
+	def output(self, stream, pretty):
+		if self.payload:
+			self.writePayload(stream, False)
+		if self.payload or self.childGroups[0]:
+			stream.write(':')
+		self.writeChildren(stream, pretty)
 
 class ArrayNode(Node):
-	pass
+
+	def output(self, stream, pretty):
+		needsBrackets = ((self.payload and '-' == self.payload.text) or not self.childGroups[0] or (1 == len(self.childGroups) and 1 == len(self.childGroups[0]) and not isinstance(self.childGroups[0][0], PairNode) and not isinstance(self.childGroups[0][0], ArrayNode)))
+		if needsBrackets:
+			stream.write('[')
+		self.writeChildren(stream, pretty)
+		if needsBrackets:
+			stream.write(']')
 
 class RecordNode(Node):
-	pass
+
+	def output(self, stream, pretty):
+		stream.write('[RECORD]')
 
 #
 # Parser
@@ -327,9 +358,11 @@ class Parser:
 			# Pay attention to blank lines.
 			if all(isinstance(t, IndentToken) for t in tokenList):
 				blankLineFlag = True
+				lineNumber += 1
 				continue
 			# Filter the tokens to remove comment-only lines, etc.
 			if all(isinstance(t, IndentToken) or isinstance(t, CommentToken) for t in tokenList):
+				lineNumber += 1
 				continue
 			tokenList = filter(lambda t: not isinstance(t, CommentToken), tokenList)
 			self.indent = tokenList[0] if isinstance(tokenList[0], IndentToken) else indent_none
@@ -381,5 +414,8 @@ if __name__ == '__main__':
 	lexer = Lexer(sys.stdin)
 	parser = Parser(lexer)
 	# write string representation of parser's getNodes() to stdout
-	sys.stdout.write(str(parser.getNodes()))
+	nodeTree = parser.getNodes()
+	sys.stdout.write(str(nodeTree))
+	sys.stdout.write('\n')
+	nodeTree.output(sys.stdout, False)
 	print
