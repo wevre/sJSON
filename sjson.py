@@ -191,26 +191,41 @@ class Node:
 		group = self.childGroups[-1]
 		group.append(child)
 
+	def writeOpen(self, char, stream, pretty):
+		stream.write(char)
+		Node.indent += ' '*5
+		if pretty: stream.write('\n' + Node.indent)
+
+	def writeClose(self, char, stream, pretty):
+		Node.indent = Node.indent[:-5]
+		if pretty: stream.write('\n' + Node.indent)
+		stream.write(char)
+
+	def writeSep(self, char, stream, pretty):
+		stream.write(char)
+		if pretty: stream.write('\n' + Node.indent)
+
 	def writeChildren(self, stream, pretty):
 		needsOuterWrap = (self.childGroups and 1<len(self.childGroups))
-		if needsOuterWrap: stream.write('[')
+		if needsOuterWrap: self.writeOpen('[', stream, pretty)
 		doneOneGroup = False
 		for children in self.childGroups:
 			braces = (children and all(isinstance(c, PairNode) for c in children))
-			if doneOneGroup: stream.write(',')
+			if doneOneGroup: self.writeSep(',', stream, pretty)
 			needsWrap = (children and (1<len(children) or braces))
-			if needsWrap: stream.write('{' if braces else '[')
+			if needsWrap: self.writeOpen('{' if braces else '[', stream, pretty)
 			doneOneChild = False
 			for c in children:
-				if doneOneChild: stream.write(',')
+				if doneOneChild: self.writeSep(',', stream, pretty)
 				needsBraces = (not braces and isinstance(c, PairNode))
-				if needsBraces: stream.write('{')
+				needsIndent = (len(c.childGroups) > 1 or len(c.childGroups[0]) > 1)
+				if needsBraces: self.writeOpen('{', stream, pretty and needsIndent)
 				c.output(stream, pretty)
-				if needsBraces: stream.write('}')
+				if needsBraces: self.writeClose('}', stream, pretty and needsIndent)
 				doneOneChild = True
-			if needsWrap: stream.write('}' if braces else ']')
+			if needsWrap: self.writeClose('}' if braces else ']', stream, pretty)
 			doneOneGroup = True
-		if needsOuterWrap: stream.write(']')
+		if needsOuterWrap: self.writeClose(']', stream, pretty)
 
 	def writePayload(self, stream, literals=True):
 		stripped = self.payload.text.strip()
@@ -236,22 +251,38 @@ class PairNode(Node):
 			self.writePayload(stream, False)
 		if self.payload or self.childGroups[0]:
 			stream.write(':')
+			if pretty: stream.write(' ')
 		self.writeChildren(stream, pretty)
 
 class ArrayNode(Node):
 
 	def output(self, stream, pretty):
 		needsBrackets = ((self.payload and '-' == self.payload.text) or not self.childGroups[0] or (1 == len(self.childGroups) and 1 == len(self.childGroups[0]) and not isinstance(self.childGroups[0][0], PairNode) and not isinstance(self.childGroups[0][0], ArrayNode)))
-		if needsBrackets:
-			stream.write('[')
+		if needsBrackets: self.writeOpen('[', stream, pretty and self.childGroups[0])
 		self.writeChildren(stream, pretty)
-		if needsBrackets:
-			stream.write(']')
+		if needsBrackets: self.writeClose(']', stream, pretty and self.childGroups[0])
 
 class RecordNode(Node):
 
 	def output(self, stream, pretty):
-		stream.write('[RECORD]')
+		needsBrackets = ((self.payload and '-' == self.payload.text) or not self.childGroups[0] or (1 == len(self.childGroups) and 1 == len(self.childGroups[0]) and not isinstance(self.childGroups[0][0], PairNode) and not isinstance(self.childGroups[0][0], ArrayNode)))
+		if needsBrackets: self.writeOpen('[', stream, pretty)
+		self.writeChildren(stream, pretty)
+		if needsBrackets: self.writeClose(']', stream, pretty)
+
+	def zip(self, keys, list):
+		i = 0
+		result = []
+		while i < len(keys):
+			if i < len(list) and list[i].payload.text:
+				result.append(PairNode(self.indent, keys[i].payload, [ list[i] ]))
+			i += 1
+		return result
+
+	def addChild(self, child, flag):
+		assert(isinstance(child, ArrayNode))
+		convert = self.zip(self.keys.childGroups[0], child.childGroups[0])
+		Node.addChild(self, ArrayNode(child.indent, None, convert), flag)
 
 #
 # Parser
@@ -261,6 +292,7 @@ class Parser:
 
 	def __init__(self, lexer):
 		self.lexer = lexer
+		self.skipEmpty = True #NOTE: Controls when parsing value lists if consecutive commas generate a Node
 
 	def parseArrayMarker(self, tokens):
 		target = 1 if isinstance(tokens[0], IndentToken) else 0
@@ -290,9 +322,6 @@ class Parser:
 		#TODO: check for errors, if the parsedNode is not at array, turn it into one. If it is empty, we have an error
 		self.parsedNode = RecordNode(self.indent, name, None, keys)
 		return True
-
-	def parseFieldList(self, tokens):
-		pass
 
 	def parseString(self, tokens):
 		assert tokens
@@ -329,13 +358,15 @@ class Parser:
 			tklist = []
 			while target < len(tokens) and isinstance(tokens[target], CommaToken):
 				commaFlag = True
+				if not self.skipEmpty and target > 0 and isinstance(tokens[target-1], CommaToken):
+					ndlist.append(StringNode(self.indent, NameToken('', tokens[target].lineNumber, tokens[target].charPosition)))
 				target += 1
 			while target < len(tokens) and not isinstance(tokens[target], CommaToken):
 				tklist.append(tokens[target])
 				target += 1
 			if tklist and ((stringOnly and self.parseString(tklist)) or self.parseValue(tklist)):
 				ndlist.append(self.parsedNode)
-		if 1 == len(ndlist) and not commaFlag:
+		if 1 == len(ndlist) and not commaFlag and not stringOnly and self.skipEmpty:
 			self.parsedNode = ndlist[0]
 		else:
 			self.parsedNode = ArrayNode(self.indent, None, ndlist)
@@ -354,7 +385,7 @@ class Parser:
 		nodeStack = [ ArrayNode(None) ]
 		lineNumber = 0
 		for tokenList in self.lexer.getTokens():
-			print 'line ' + str(lineNumber) + ': ' + ', '.join(str(t) for t in tokenList) + '\n'
+#			print 'line ' + str(lineNumber) + ': ' + ', '.join(str(t) for t in tokenList) + '\n'
 			# Pay attention to blank lines.
 			if all(isinstance(t, IndentToken) for t in tokenList):
 				blankLineFlag = True
@@ -378,17 +409,20 @@ class Parser:
 				else:
 					finished = nodeStack.pop()
 					#TODO: this might be a place to examine the just-popped container and emit warnings if stuff is empty that we expected to have children.
+					#NOTE: if we run off the end of the file, we'll never see these pops
 			if not nodeStack:
 				print 'error: we popped our way off the node stack'
 				return None
 			# Generate the new node from the current line of tokens
 			cursor = nodeStack[-1]
 			if cursor.keys:
+				self.skipEmpty = False
 				if self.parseValueList(tokenList):
 					newNode = self.parsedNode
 				else:
 					print 'error parsing field list in table mode'
 					return None
+				self.skipEmpty = True
 			elif self.parseArrayMarker(tokenList) or self.parseOpenPair(tokenList) or self.parseRecordDef(tokenList):
 				newNode = self.parsedNode
 				nodeStack.append(newNode)
@@ -400,7 +434,6 @@ class Parser:
 			cursor.addChild(newNode, blankLineFlag)
 			blankLineFlag = False
 			lineNumber += 1
-		# here we are done with the tokens.
 		return nodeStack[0]
 
 #
@@ -410,9 +443,8 @@ class Parser:
 if __name__ == '__main__':
 	lexer = Lexer(sys.stdin)
 	parser = Parser(lexer)
-	# write string representation of parser's getNodes() to stdout
 	nodeTree = parser.getNodes()
-	sys.stdout.write(str(nodeTree))
-	sys.stdout.write('\n')
-	nodeTree.output(sys.stdout, False)
+# 	sys.stdout.write(str(nodeTree))
+# 	sys.stdout.write('\n')
+	nodeTree.output(sys.stdout, True)
 	print
