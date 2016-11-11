@@ -6,6 +6,7 @@
 #
 
 #TODO: deal with quotes, numbers, literals (i.e., when to add quotes and when not to)
+#TODO: if a childGroup has only one item, don't wrap it as an array
 #TODO: deal with arrays of pairs (so they wrap with braces instead of brackets)
 #TODO: remember to .strip() the underlying Name tokens
 #TODO: wrap some of our longer lines, if possible
@@ -165,7 +166,6 @@ class Lexer:
 
 	def getTokens(self):
 		for line in self.file:
-			#TODO: If we want, we could skip over empty lines, and INDENT/COMMENT-only lines right here
 			yield self.scanLine(line)
 			self.lineNumber += 1
 
@@ -178,8 +178,8 @@ class Node:
 	indent = ''
 
 	def __init__(self, indent, payload = None, children = None, keys = None):
-		self.indent = indent #NOTE: This will be an IndentToken or None (for the outermost array)
-		self.children = children if children else [] #NOTE: These will be Nodes.
+		self.indent = indent #NOTE: This will be an IndentToken or None (for the outermost array).
+		self.childGroups = [ children ] if children else [ [] ] #NOTE: These will be an array of arrays of Nodes.
 		self.payload = payload #NOTE: This will be a Token or None.
 		self.keys = keys #This will be an array of Strings
 
@@ -188,14 +188,27 @@ class Node:
 		if self.payload:
 			result += ' payload=`' + self.payload.text.strip() + '`'
 		if self.keys:
-			result += ' keys=[' + ', '.join(c.payload.text.strip() for c in self.keys.children) + ']'
-		if self.children:
-			result += ' children=[\n'
+			result += ' keys=[' + ', '.join(c.payload.text.strip() for c in self.keys.childGroups[-1]) + ']'
+		if self.childGroups[-1]: #TODO: this needs to change to accommodate groups
+			result += ' children=['
+			i = 1
 			Node.indent += ' '*5
-			result += '\n'.join(str(c) for c in self.children)
+			for children in self.childGroups:
+				result += '\n' + Node.indent + 'Group ' + str(i) + ': [\n'
+				Node.indent += ' '*5
+				result += '\n'.join(str(c) for c in children)
+				Node.indent = Node.indent[:-5]
+				result += '\n' + Node.indent + ']'
+				i += 1
 			Node.indent = Node.indent[:-5]
 			result += '\n' + Node.indent + ']'
 		return result
+
+	def addChild(self, child, flag):
+		if self.childGroups[-1] and flag:
+			self.childGroups.append([])
+		group = self.childGroups[-1]
+		group.append(child)
 
 class StringNode(Node):
 	pass
@@ -305,13 +318,18 @@ class Parser:
 
 	def getNodes(self):
 		'''Steps through all the tokens returned from the lexer and constructs a hierarchy of Node objects.'''
+		blankLineFlag = False
 		indent_none = IndentToken('', 0, 0)
 		nodeStack = [ ArrayNode(None) ]
 		lineNumber = 0
 		for tokenList in self.lexer.getTokens():
 			print 'line ' + str(lineNumber) + ': ' + ', '.join(str(t) for t in tokenList) + '\n'
-			# Filter the tokens to remove blank lines, comment-only lines, etc.
-			if all(isinstance(t, IndentToken) or isinstance(t, CommentToken) for t in tokenList): # NOTE: This also handily returns true for an empty token list.
+			# Pay attention to blank lines.
+			if all(isinstance(t, IndentToken) for t in tokenList):
+				blankLineFlag = True
+				continue
+			# Filter the tokens to remove comment-only lines, etc.
+			if all(isinstance(t, IndentToken) or isinstance(t, CommentToken) for t in tokenList):
 				continue
 			tokenList = filter(lambda t: not isinstance(t, CommentToken), tokenList)
 			self.indent = tokenList[0] if isinstance(tokenList[0], IndentToken) else indent_none
@@ -319,7 +337,7 @@ class Parser:
 			while nodeStack:
 				cursor = nodeStack[-1]
 				if not cursor.indent or (self.indent.text > cursor.indent.text and self.indent.text.startswith(cursor.indent.text)):
-					if not cursor.children or cursor.children[-1].indent.text == self.indent.text:
+					if not cursor.childGroups[-1] or cursor.childGroups[-1][-1].indent.text == self.indent.text:
 						#everything is okay
 						pass
 					else:
@@ -349,7 +367,8 @@ class Parser:
 			else:
 				print 'error: unable to parse anything on this line: ' + lineNumber
 				return None
-			cursor.children.append(newNode)
+			cursor.addChild(newNode, blankLineFlag)
+			blankLineFlag = False
 			lineNumber += 1
 		# here we are done with the tokens.
 		return nodeStack[0]

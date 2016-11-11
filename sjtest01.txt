@@ -2,5 +2,6 @@ stat :  ok
 blogs : ## here is a comment
 	blog :: id, name, needspassword, url
 		73, Bloxus test, false, "http://remote.bloxus.com"
+
 		74, Manila Test, true, "http://flickrtest1.userland.com/"
 		75, "Don't \"paint\" the town red", false, "http://example.com"
