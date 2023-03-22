@@ -1,0 +1,32 @@
+[
+     {
+          "books": [
+               "Just Me",
+               [
+                    "Some Others",
+                    "That Go",
+                    "Together"
+               ],
+               "By Myself"
+          ]
+     },
+     {
+          "shows": [
+               "I Love Lucy",
+               "Addams Family",
+               "Star Trek"
+          ],
+          "actors": [
+               "Alan Alda",
+               "Bette Midler",
+               "Tony Danza"
+          ]
+     },
+     {
+          "songs": [
+               "Over the Rainbow",
+               "Peppermint Sky",
+               "Love me Tender"
+          ]
+     }
+]
